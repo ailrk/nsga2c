@@ -51,6 +51,8 @@ typedef struct NSGAIIVals {
   size_t ninds;         /* num of individuals */
   size_t nobjs;         /* num of objectives */
   size_t nfeatures;     /* num of parameters for objectives functions */
+  double maxobj;        /* max objectives */
+  double minobj;        /* min objectives */
   int ngenes_to_mutate; /* how many generations for mutation to happen */
   int ntour_particips;  /* num of tournament participants */
 } NSGAIIVals;
