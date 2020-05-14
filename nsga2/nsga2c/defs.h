@@ -3,20 +3,33 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+typedef struct IndList IndList;
+
+// Individual is actually a linked list.
 typedef struct Individual {
-  int rank;                      /* rank based on nondetermination */
-  double crowd_dist;             /* corwding distance */
-  double *features;              /* parameters of objectives function */
-  double *objs;                  /* result of objective functions  */
-  struct Individual **dominates; /* list of individules it dominates */
-  long ndomin;                   /* number of individules dominated it. */
+  int rank;           /* rank based on nondetermination */
+  double crowd_dist;  /* corwding distance */
+  double *features;   /* parameters of objectives function */
+  double *objs;       /* result of objective functions  */
+  IndList *dominates; /* list of individules it dominates */
+  long ndomin;        /* number of individules dominated it. */
 } Individual;
 
-#define EMPTY_INDIVIDUAL                                                       \
-  {                                                                            \
-    .rank = 0, .crowding_dist = 0.0, features = NULL, objs = NULL,             \
-    dominated = NULL, ndominated = 0L                                          \
-  }
+typedef struct IndList {
+  Individual *ind;
+  struct IndList *next;
+} IndList;
+
+static inline IndList *linew_head() {
+  IndList *list = (IndList *)malloc(sizeof(IndList));
+  *list = {.ind = NULL, .next = NULL};
+  return list;
+}
+
+static inline void lipush(IndList *list, Individual *ind) {
+  list->ind = ind;
+  list->next = NULL;
+}
 
 typedef Individual *Population;
 typedef double (*ObjectiveFunc)(double *features);
@@ -46,7 +59,8 @@ typedef struct Pool {
   Population *population; /* all population in pool */
   Population **fronts;    /* fronts in population. stores ptr to population. */
   size_t nrealpop;        /* real number of population */
-  size_t nrank;           /* total number of fronts */
+  size_t nrank;           /* current number of fronts. */
+  size_t fronts_sz;       /* the true size allocated for fronts */
 } Pool;
 
 /* helpers */
@@ -69,7 +83,12 @@ static inline bool dominates(NSGAIIVals *nsga2, Individual *a, Individual *b) {
 
 static inline Individual *create_emptyind() {
   Individual *p = (Individual *)malloc(sizeof(Individual));
-  *p = EMPTY_INDIVIDUAL;
+  *p = {.rank = 0,
+        .crowd_dist = 0.0,
+        .features = NULL,
+        .objs = NULL,
+        .dominates = NULL,
+        .ndomin = 0L};
   return p;
 }
 
