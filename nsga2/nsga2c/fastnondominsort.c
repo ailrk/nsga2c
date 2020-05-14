@@ -59,8 +59,8 @@ static inline size_t get_ranksz(Population *end, Population *start) {
 }
 
 /* return top and bottom ptr bound elements in the rank. */
-static inline void choose_rank(int rank, Pool *p, Population *top,
-                               Population *bottom) {
+static inline void get_rank_tuple(int rank, Pool *p, Population *top,
+                                  Population *bottom) {
   assert(rank <= p->nrank);
   top = p->fronts[rank + 1];
   bottom = p->fronts[rank];
@@ -76,7 +76,7 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
 
   /* at this point rank 0 should already be sorted out. */
   assert(p->nrank == 1);
-  choose_rank(0, p, front_end, front_beg);
+  get_rank_tuple(0, p, front_end, front_beg);
   last_ranksz = get_ranksz(front_beg, front_end);
 
   while (last_ranksz > 0) {
@@ -97,8 +97,8 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
       }
     }
     p->nrank++;
-    update_rank(p, p->nrank,front_end);
-    choose_rank(p->nrank, p, front_end, front_beg);
+    update_rank(p, p->nrank, front_end);
+    get_rank_tuple(p->nrank, p, front_end, front_beg);
     last_ranksz = get_ranksz(front_end, front_beg);
   }
 }
