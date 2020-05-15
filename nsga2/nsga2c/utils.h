@@ -1,15 +1,14 @@
 #ifndef _UTILS
 #define _UTILS
 #include "defs.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <assert.h>
 
 // return 0 if error happened.
-size_t init_population(NSGAIIVals *, Population *p, size_t front_sz);
-Individual *create_offspring(NSGAIIVals *, Pool *p, size_t pop_sz);
+void init_population(NSGAIIVals *, Pool *p);
+Population create_offspring(NSGAIIVals *, Pool *p);
 void crossover(NSGAIIVals *nsga2, Individual *ind1, Individual *ind2);
-int cmp_objective(NSGAIIVals *nsga2, Individual *ind1, Individual *ind2, int m);
 void mutate(NSGAIIVals *nsga2, Individual *offspring);
 void tournament(NSGAIIVals *nsga2, Population *p, Individual *best);
 
@@ -25,5 +24,12 @@ static inline size_t get_frontsz(Population *end, Population *start) {
   return end - start;
 }
 
+static inline void exend_population_with_offspring(NSGAIIVals *nsga2, Pool *p) {
+  Population *end;
+  end = p->population + p->nrealpop;
+  p->population = (Population *)realloc(
+      p->population, sizeof(Population) * (nsga2->ninds + p->nrealpop));
+
+}
 
 #endif /* ifndef _UTILS */

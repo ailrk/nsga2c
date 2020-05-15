@@ -106,7 +106,7 @@ bool fast_nondominated_sort(NSGAIIVals *nsga2, Pool *p) {
    * all population can be fit into population.
    * worst case is a single rank with all individules,
    * in wich case p->fronts[0] (rank 0) has the same size as frontbuf. */
-  p->fronts = (Population **)malloc(sizeof(Population **) * p->fronts_sz);
+  p->fronts = (Population **)malloc(sizeof(Population *) * p->fronts_sz);
   tag_dominations(nsga2, p);
   assign_rank(nsga2, p);
   return true;

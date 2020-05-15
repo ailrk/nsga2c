@@ -3,6 +3,6 @@
 #include "defs.h"
 #include "utils.h"
 
-extern Population *evolve(NSGAIIVals *config);
+Population evolve(NSGAIIVals *nsga2, Problem *problem);
 
 #endif /* ifndef _EVOLUTION */

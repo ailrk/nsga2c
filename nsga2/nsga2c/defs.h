@@ -48,7 +48,7 @@ typedef struct NSGAIIVals {
   Problem *problem;
   double mutstren;      /* mutation strength */
   long ngen;            /* num of generation */
-  size_t ninds;         /* num of individuals */
+  size_t ninds;         /* num of individuals nominated */
   size_t nobjs;         /* num of objectives */
   size_t nfeatures;     /* num of parameters for objectives functions */
   double maxobj;        /* max objectives */
@@ -60,7 +60,7 @@ typedef struct NSGAIIVals {
 typedef struct Pool {
   Population *population; /* all population in pool */
   Population **fronts;    /* fronts in population. stores ptr to population. */
-  size_t nrealpop;        /* real number of population */
+  size_t nrealpop;        /* real number of population. */
   size_t nrank;           /* current number of fronts. */
   size_t fronts_sz;       /* the true size allocated for fronts */
 } Pool;

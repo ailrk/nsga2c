@@ -14,32 +14,27 @@ static void swap(double *a, double *b);
 
 /* create initial population with random features and objectives calculated.
  * return 0 on error */
-size_t init_population(NSGAIIVals *nsga2, Population *p, size_t front_sz) {
-  if (nsga2->ninds != front_sz)
-    return 0;
-
+void init_population(NSGAIIVals *nsga2, Pool *p) {
   double upper, lower, feature;
-  for (int i = 0; i < front_sz; i++) {
-    p[i] = create_emptyind();
+  for (int i = 0; i < nsga2->ninds; i++) {
+    p->population[i] = create_emptyind();
     for (int j = 0; j < nsga2->nfeatures; j++) {
       /* generate random feature */
       upper = nsga2->problem->feature_domains[i].upper;
       lower = nsga2->problem->feature_domains[i].lower;
       feature = fmod(rand(), (upper - lower + 1) + lower);
-      p[i]->features[j] = feature;
+      p->population[i]->features[j] = feature;
     }
     /* calculate objective */
-    calobjs(nsga2, p[i]->features, p[i]->objs);
+    calobjs(nsga2, p->population[i]->features, p->population[i]->objs);
   }
-
-  return front_sz;
 }
 
 /* create children from current population */
-Individual *create_offspring(NSGAIIVals *nsga2, Pool *p, size_t pop_sz) {
-  Individual *children = (Individual *)malloc(sizeof(Individual) * pop_sz);
+Population create_offspring(NSGAIIVals *nsga2, Pool *p) {
+  Individual *children = (Individual *)malloc(sizeof(Individual) * nsga2->ninds);
   /* make sure has 2 empty space */
-  for (int i = 0; i < pop_sz; i += 2) {
+  for (int i = 0; i < nsga2->ninds; i += 2) {
     Individual *parent1 = NULL, *parent2, *child1, *child2;
     tournament(nsga2, p->population, parent1);
     parent2 = parent1;
@@ -76,16 +71,6 @@ bool update_pool(NSGAIIVals *nsga2, Pool *p, Individual *other,
   /* update size information */
   p->nrealpop += other_n;
   return true;
-}
-
-/* It will be used to sort individuals before calcualte crowing distance */
-int cmp_objective(NSGAIIVals *nsga2, Individual *ind1, Individual *ind2, int m) {
-  if (m < 0 || m > nsga2->nobjs) {
-    perror("Accessing non exsited objective");
-  }
-  int o1 = ind1->objs[m];
-  int o2 = ind2->objs[m];
-  return o1 == o2 ? 0 : (o1 > o2 ? 1 : -1);
 }
 
 #define FOR_EACH_RANDOM(random, n)                                             \
