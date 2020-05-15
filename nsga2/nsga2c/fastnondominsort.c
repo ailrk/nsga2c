@@ -11,12 +11,12 @@ static void swapind(Individual *a, Individual *b) {
 }
 
 /* update rank my 1, and point the new front to top */
-static bool update_rank(Pool *p, int rank, Population *top) {
+static bool update_rank(Pool *p, int rank, Population top) {
   /* realloc if space is not enough */
   if (rank >= p->fronts_sz) {
     p->fronts_sz = (int)(p->fronts_sz * 1.6);
     p->fronts =
-        (Population **)realloc(p->fronts, sizeof(Population **) * p->fronts_sz);
+        (Population *)realloc(p->fronts, sizeof(Population) * p->fronts_sz);
   }
   if (rank - 1 == p->nrank && rank < p->fronts_sz) {
     p->fronts[rank] = top;
@@ -30,15 +30,15 @@ static void tag_dominations(NSGAIIVals *nsga2, Pool *p) {
   int n = p->nrealpop;
   Individual *ind, *other;
   // TODO
-  Population *sp = p->population;
+  Population sp = p->population;
   for (size_t i = 0; i < n; i++) {
-    ind = *p->population + i;
+    ind = &p->population[i];
     ind->ndomin = 0;
     /* use linked list because ind->dominates will always be traversaled
      * and the contain needs to be update dyamically frequently */
     ind->dominates = linew_head();
     for (int j = 0; j < p->nrealpop; j++) {
-      other = *p->population + j;
+      other = &p->population[j];
       if (dominates(nsga2, ind, other)) {
         lipush(ind->dominates, other);
       } else if (dominates(nsga2, other, ind)) {
@@ -47,7 +47,7 @@ static void tag_dominations(NSGAIIVals *nsga2, Pool *p) {
     }
     if (ind->ndomin == 0) {
       /* swap ind with rank 0 to the front. */
-      swapind(*sp++, ind);
+      swapind(sp++, ind);
       ind->rank = 0;
     }
   }
@@ -59,7 +59,7 @@ static void tag_dominations(NSGAIIVals *nsga2, Pool *p) {
  * base on the number of iteration */
 static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
   size_t last_ranksz;
-  Population *front_end, *front_beg;
+  Population front_end, front_beg;
   Individual *ind, *other;
   IndList *dominates;
 
@@ -106,7 +106,7 @@ bool fast_nondominated_sort(NSGAIIVals *nsga2, Pool *p) {
    * all population can be fit into population.
    * worst case is a single rank with all individules,
    * in wich case p->fronts[0] (rank 0) has the same size as frontbuf. */
-  p->fronts = (Population **)malloc(sizeof(Population *) * p->fronts_sz);
+  p->fronts = (Population *)malloc(sizeof(Population) * p->fronts_sz);
   tag_dominations(nsga2, p);
   assign_rank(nsga2, p);
   return true;

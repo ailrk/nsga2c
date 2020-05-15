@@ -58,11 +58,11 @@ typedef struct NSGAIIVals {
 } NSGAIIVals;
 
 typedef struct Pool {
-  Population *population; /* all population in pool */
-  Population **fronts;    /* fronts in population. stores ptr to population. */
-  size_t nrealpop;        /* real number of population. */
-  size_t nrank;           /* current number of fronts. */
-  size_t fronts_sz;       /* the true size allocated for fronts */
+  Population population; /* all population in pool */
+  Population *fronts;    /* fronts in population. stores ptr to population. */
+  size_t nrealpop;       /* real number of population. */
+  size_t nrank;          /* current number of fronts. */
+  size_t fronts_sz;      /* the true size allocated for fronts */
 } Pool;
 
 /* helpers */
@@ -83,18 +83,13 @@ static inline bool dominates(NSGAIIVals *nsga2, Individual *a, Individual *b) {
   return result;
 }
 
-static inline Individual *create_emptyind() {
-  Individual *p = (Individual *)malloc(sizeof(Individual));
-  *p = {.rank = 0,
-        .crowd_dist = 0.0,
-        .features = NULL,
-        .objs = NULL,
-        .dominates = NULL,
-        .ndomin = 0L};
-  return p;
+static inline void mkind(Individual *ind) {
+  *ind = {.rank = 0,
+          .crowd_dist = 0.0,
+          .features = NULL,
+          .objs = NULL,
+          .dominates = NULL,
+          .ndomin = 0L};
 }
-
-// utils.c
-bool update_pool(NSGAIIVals *, Pool *p, Individual *other, size_t other_n);
 
 #endif /* ifndef _DEFS */

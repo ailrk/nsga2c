@@ -12,35 +12,80 @@
 static void pickrand(int *buffer, size_t n, int *random);
 static void swap(double *a, double *b);
 
+/* mem */
+
+int allocpopulation(NSGAIIVals *nsga2, Pool *p) {
+  p->population = (Population)malloc(sizeof(Individual) * nsga2->ninds);
+  if (p->population == 0) {
+    perror("error when allocating population");
+    exit(-1);
+  }
+  p->nrealpop = nsga2->ninds;
+  return 0;
+}
+
+void freepopulation(Pool *p) {
+  free(p->population);
+  p->nrealpop = 0;
+}
+
+void rellocpopulation(NSGAIIVals *nsga2, Pool *p, size_t n) {
+  if (n <= 0) {
+    return;
+  }
+  size_t newsz = p->nrealpop + n;
+  p->population =
+      (Population)realloc(p->population, sizeof(Individual) * newsz);
+  p->nrealpop = newsz;
+}
+
+int allocfronts(Pool * p, size_t rank) {
+  p->fronts = (Population*)malloc(sizeof(Population) * rank);
+  if (p->fronts == 0) {
+    perror("failed to allocate fronts");
+    exit(-1);
+  }
+  p->nrank = rank;
+  return 1;
+}
+
+void freefronts(Pool * pool) {
+  free(pool->fronts);
+  pool->nrank = 0;
+}
+
 /* create initial population with random features and objectives calculated.
  * return 0 on error */
 void init_population(NSGAIIVals *nsga2, Pool *p) {
+  assert(p->population != NULL);
   double upper, lower, feature;
   for (int i = 0; i < nsga2->ninds; i++) {
-    p->population[i] = create_emptyind();
+    mkind(&p->population[i]);
     for (int j = 0; j < nsga2->nfeatures; j++) {
       /* generate random feature */
       upper = nsga2->problem->feature_domains[i].upper;
       lower = nsga2->problem->feature_domains[i].lower;
       feature = fmod(rand(), (upper - lower + 1) + lower);
-      p->population[i]->features[j] = feature;
+      p->population[i].features[j] = feature;
     }
     /* calculate objective */
-    calobjs(nsga2, p->population[i]->features, p->population[i]->objs);
+    calobjs(nsga2, p->population[i].features, p->population[i].objs);
   }
 }
 
-/* create children from current population */
-Population create_offspring(NSGAIIVals *nsga2, Pool *p) {
-  Individual *children = (Individual *)malloc(sizeof(Individual) * nsga2->ninds);
+/* create children from current population
+ * space should be already allocated. */
+void create_offspring(NSGAIIVals *nsga2, Pool *p, Population offset) {
+  assert(p->nrealpop <= nsga2->ninds * 2);
+  assert(offset != NULL);
   /* make sure has 2 empty space */
   for (int i = 0; i < nsga2->ninds; i += 2) {
     Individual *parent1 = NULL, *parent2, *child1, *child2;
-    tournament(nsga2, p->population, parent1);
+    tournament(nsga2, &p->population, parent1);
     parent2 = parent1;
     /* make sure parent1 and parent2 are different individuals */
     while (parent2 == parent1) {
-      tournament(nsga2, p->population, parent2);
+      tournament(nsga2, &p->population, parent2);
     }
     *child1 = *parent1;
     *child2 = *parent2;
@@ -49,28 +94,9 @@ Population create_offspring(NSGAIIVals *nsga2, Pool *p) {
     calobjs(nsga2, child1->features, child1->objs);
     calobjs(nsga2, child2->features, child2->objs);
 
-    children[i] = *child1;
-    children[i + 1] = *child2;
+    offset[i] = *child1;
+    offset[i + 1] = *child2;
   }
-  return children;
-}
-
-/* stitch new Population to pool and update nrealpop */
-bool update_pool(NSGAIIVals *nsga2, Pool *p, Individual *other,
-                 size_t other_n) {
-  Individual *ptr;
-  if (other_n <= 0) {
-    errno = ERANGE;
-    perror("error happend when updating population");
-    return false;
-  }
-  *p->population = (Population)realloc(p->population, p->nrealpop + other_n);
-  ptr = *p->population + other_n;
-  *ptr = *other;
-  free(other);
-  /* update size information */
-  p->nrealpop += other_n;
-  return true;
 }
 
 #define FOR_EACH_RANDOM(random, n)                                             \
@@ -128,4 +154,3 @@ static void swap(double *a, double *b) {
   *a = *b;
   *b = temp;
 }
-

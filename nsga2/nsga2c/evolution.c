@@ -15,9 +15,9 @@ static void init(NSGAIIVals *nsga2, Pool *pool, Problem *problem) {
 
 Population evolve(NSGAIIVals *nsga2, Problem *problem) {
   Pool *pool = NULL;
-  Population returned_pop;
-  Population offspring;
+  Population returned_pop, offspring, new_pop;
   long frontnum;
+
   init(nsga2, pool, problem);
   offspring = create_offspring(nsga2, pool);
   for (int i = 0; i < nsga2->ngen; i++) {
@@ -25,10 +25,9 @@ Population evolve(NSGAIIVals *nsga2, Problem *problem) {
     update_pool(nsga2, pool, offspring, nsga2->ninds);
     fast_nondominated_sort(nsga2, pool);
     frontnum = 0;
-    while () {
-    }
-  }
+    new_pop = NULL;
 
+  }
 
   free(pool->population);
   free(pool->fronts);
