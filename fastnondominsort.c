@@ -70,7 +70,7 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
 
   while (last_ranksz > 0) {
     for (int i = 0; i < last_ranksz; i++) {
-      ind = front_beg[i];
+      ind = &front_beg[i];
       dominates = ind->dominates;
       other = dominates->ind;
       /* traversal the linked list */
@@ -79,7 +79,7 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
         if (other->ndomin == 0) {
           other->rank += 1;
           /* move other to the front */
-          swapind(*front_end++, other);
+          swapind(front_end++, other);
         }
         dominates = dominates->next;
         other = dominates->ind;

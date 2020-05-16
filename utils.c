@@ -16,7 +16,7 @@ static void swap(double *a, double *b);
 
 int allocpopulation(NSGAIIVals *nsga2, Pool *p) {
   p->population = (Population)malloc(sizeof(Individual) * nsga2->ninds);
-  if (p->population == 0) {
+  if (p->population == NULL) {
     perror("error when allocating population");
     exit(-1);
   }
@@ -29,29 +29,48 @@ void freepopulation(Pool *p) {
   p->nrealpop = 0;
 }
 
-void rellocpopulation(NSGAIIVals *nsga2, Pool *p, size_t n) {
-  if (n <= 0) {
-    return;
+/* return the begining of the newly allocated memory */
+Population reallocpopulation(NSGAIIVals *nsga2, Pool *p, size_t delta) {
+  if (delta <= 0) {
+    return NULL;
   }
-  size_t newsz = p->nrealpop + n;
+  Population offset = p->population + p->nrealpop;
+  size_t newsz = p->nrealpop + delta;
   p->population =
       (Population)realloc(p->population, sizeof(Individual) * newsz);
   p->nrealpop = newsz;
+  return offset;
 }
 
 int allocfronts(Pool * p, size_t rank) {
+  if (p->fronts == NULL) {
+    return -1;
+  }
   p->fronts = (Population*)malloc(sizeof(Population) * rank);
-  if (p->fronts == 0) {
+  if (p->fronts == NULL) {
     perror("failed to allocate fronts");
     exit(-1);
   }
   p->nrank = rank;
-  return 1;
+  return 0;
 }
 
 void freefronts(Pool * pool) {
   free(pool->fronts);
   pool->nrank = 0;
+}
+
+int allocpool(NSGAIIVals *nsga2, Pool *pool) {
+  if (pool->population != NULL) {
+    return 1;
+  }
+  allocpopulation(nsga2, pool);
+  return 0;
+}
+
+void freepool(Pool *pool) {
+  freefronts(pool);
+  freepopulation(pool);
 }
 
 /* create initial population with random features and objectives calculated.
@@ -75,8 +94,10 @@ void init_population(NSGAIIVals *nsga2, Pool *p) {
 
 /* create children from current population
  * space should be already allocated. */
-void create_offspring(NSGAIIVals *nsga2, Pool *p, Population offset) {
+void create_offspring(NSGAIIVals *nsga2, Pool *p) {
   assert(p->nrealpop <= nsga2->ninds * 2);
+  /* extend population to fit offsprings */
+  Population offset = reallocpopulation(nsga2, p, nsga2->ninds);
   assert(offset != NULL);
   /* make sure has 2 empty space */
   for (int i = 0; i < nsga2->ninds; i += 2) {
