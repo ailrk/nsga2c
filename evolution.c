@@ -30,7 +30,6 @@ static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
   int rank = 0;
   size_t top = 0, frontsz = get_frontszp(rank, pool);
 
-  /* alloc individule size to new population  */
   newpop = (Population)malloc(sizeof(Individual) * ninds * 2);
 
   while (top + frontsz < ninds) { /* fill half */
