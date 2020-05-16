@@ -20,11 +20,11 @@ static int cmp_objective(const void *a, const void *b, void *idx) {
 /* calculate crowding distance for one front */
 void calculate_crowd_distance(NSGA2ctx *nsga2, Pool *p, int rank) {
   assert(p->fronts != NULL && p->fronts_sz > 0);
-  Population front_beg, front_end;
+  Population front_beg = NULL, front_end = NULL;
   size_t frontsz;
   if (p->nrank > 0) {
     get_front_tuple(rank, p, front_end, front_beg);
-    get_frontsz(front_end, front_beg);
+    frontsz = get_frontsz(front_end, front_beg);
     for (Population ptr = front_beg; ptr <= front_end; ptr++) {
       ptr->crowd_dist = 0;
     }
@@ -33,7 +33,7 @@ void calculate_crowd_distance(NSGA2ctx *nsga2, Pool *p, int rank) {
       qsort_r(front_beg, frontsz, sizeof(Individual), cmp_objective, &m);
       front_beg->crowd_dist = nsga2->maxobj;
       front_end->crowd_dist = nsga2->minobj;
-      for (int i = 1; i < frontsz - 1; i++) {
+      for (size_t i = 1; i < frontsz - 1; i++) {
         front_beg[i].crowd_dist =
             (front_beg[i + 1].crowd_dist - front_beg[i - 1].crowd_dist) /
             (nsga2->maxobj - nsga2->minobj);

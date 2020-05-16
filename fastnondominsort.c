@@ -60,7 +60,7 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
 static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
   size_t last_ranksz;
   Population front_end, front_beg;
-  Individual *ind, *other;
+  Individual *ind = NULL, *other = NULL;
   IndList *dominates;
 
   /* at this point rank 0 should already be sorted out. */

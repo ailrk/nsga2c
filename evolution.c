@@ -56,13 +56,13 @@ static int cmp_crod_dist(const void *a, const void *b) {
   return crowding_operator(*(Individual **)a, *(Individual **)b);
 }
 
-/* return size of front 0 */
-static size_t cpy_final_front(NSGA2ctx *nsga2, Pool *pool, Population p,
-                              size_t front_sz) {
+/* cpy front 0 to returned_front */
+static void cpy_front0(NSGA2ctx *nsga2, Pool *pool, Population p,
+                       size_t front_sz) {
   p = (Population)malloc(sizeof(Individual) * front_sz);
-  /* cpy front 0 to returned_front */
-  for (Population ptr = pool->fronts[0]; ptr < *pool->fronts + front_sz;
-       ptr++) {
+  Population ptr = p;
+  for (int i = 0; i < front_sz; i++, ptr++) {
+    p[i] = *ptr;
   }
 }
 
@@ -93,7 +93,7 @@ Population evolve(NSGA2ctx *nsga2, Problem *problem, size_t *front_sz) {
   }
 
   *front_sz = get_frontszp(0, pool);
-  cpy_final_front(nsga2, pool, returned_front, *front_sz);
+  cpy_front0(nsga2, pool, returned_front, *front_sz);
   freepool(pool);
 
   return returned_front;
