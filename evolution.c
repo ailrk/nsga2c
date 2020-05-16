@@ -58,7 +58,7 @@ static int cmp_crod_dist(const void *a, const void *b) {
 
 /* cpy front 0 to returned_front */
 static void cpy_front0(NSGA2ctx *nsga2, Pool *pool, Population p,
-                       size_t front_sz) {
+                       const size_t front_sz) {
   p = (Population)malloc(sizeof(Individual) * front_sz);
   Population ptr = p;
   for (int i = 0; i < front_sz; i++, ptr++) {
@@ -71,13 +71,13 @@ Population evolve(NSGA2ctx *nsga2, Problem *problem, size_t *front_sz) {
   Population returned_front = NULL;
   /* newpop_top: a ptr point to new_population + size of new_population */
   Population new_population = NULL, newpop_top;
-  long lastfront;
 
   initpool(nsga2, pool, problem);
   init_offspring(nsga2, pool);
   for (int i = 0; i < nsga2->ngen; i++) {
     fast_nondominated_sort(nsga2, pool);
-    lastfront = make_newpopulation(nsga2, pool, new_population, newpop_top);
+    const long lastfront =
+        make_newpopulation(nsga2, pool, new_population, newpop_top);
     /* sort with crowding distance */
     qsort(pool->fronts[lastfront], get_frontszp(lastfront, pool),
           sizeof(Population *), cmp_crod_dist);

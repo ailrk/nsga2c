@@ -27,7 +27,7 @@ static bool update_rank(Pool *p, int rank, Population top) {
 
 /* tag the domination information for an individule. rank 0 will be sorted. */
 static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
-  int n = p->nrealpop;
+  const int n = p->nrealpop;
   Individual *ind, *other;
   // TODO
   Population sp = p->population;
@@ -59,9 +59,9 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
  * base on the number of iteration */
 static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
   size_t last_ranksz;
-  Population front_end, front_beg;
+  Population front_end = NULL, front_beg = NULL;
   Individual *ind = NULL, *other = NULL;
-  IndList *dominates;
+  const IndList *dominates;
 
   /* at this point rank 0 should already be sorted out. */
   assert(p->nrank == 1);

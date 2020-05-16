@@ -8,13 +8,24 @@
 #include <string.h>
 #include <time.h>
 
-/* private operators */
-static void pickrand(int *buffer, size_t n, int *random);
-static void swap(double *a, double *b);
+/* pick random number */
+
+static void pickrand(int *buffer, const size_t n, int *random) {
+  do
+    *random = rand() % n;
+  while (buffer[*random] != -1);
+  buffer[*random] = 1;
+}
+
+static void swap(double *a, double *b) {
+  double temp = *a;
+  *a = *b;
+  *b = temp;
+}
 
 /* mem */
 
-int allocpopulation(NSGA2ctx *nsga2, Pool *p) {
+int allocpopulation(const NSGA2ctx *nsga2, Pool *p) {
   p->population = (Population)malloc(sizeof(Individual) * nsga2->ninds);
   if (p->population == NULL) {
     perror("error when allocating population");
@@ -30,23 +41,23 @@ void freepopulation(Pool *p) {
 }
 
 /* return the begining of the newly allocated memory */
-Population expandpopulation(NSGA2ctx *nsga2, Pool *p, size_t delta) {
+Population expandpopulation(NSGA2ctx *nsga2, Pool *p, const size_t delta) {
   if (delta <= 0) {
     return NULL;
   }
-  Population offset = p->population + p->nrealpop;
-  size_t newsz = p->nrealpop + delta;
+  const Population offset = p->population + p->nrealpop;
+  const size_t newsz = p->nrealpop + delta;
   p->population =
       (Population)realloc(p->population, sizeof(Individual) * newsz);
   p->nrealpop = newsz;
   return offset;
 }
 
-int allocfronts(Pool * p, size_t rank) {
+int allocfronts(Pool *p, const size_t rank) {
   if (p->fronts == NULL) {
     return -1;
   }
-  p->fronts = (Population*)malloc(sizeof(Population) * rank);
+  p->fronts = (Population *)malloc(sizeof(Population) * rank);
   if (p->fronts == NULL) {
     perror("failed to allocate fronts");
     return -1;
@@ -55,7 +66,7 @@ int allocfronts(Pool * p, size_t rank) {
   return 0;
 }
 
-void freefronts(Pool * pool) {
+void freefronts(Pool *pool) {
   free(pool->fronts);
   pool->nrank = 0;
 }
@@ -94,7 +105,7 @@ void init_population(NSGA2ctx *nsga2, Pool *p) {
 
 /* create children from current population
  * space should be already allocated. */
-void create_offspring(NSGA2ctx *nsga2, Pool *p, Population offset) {
+void create_offspring(NSGA2ctx *nsga2, Pool *p, const Population offset) {
   assert(p->nrealpop <= nsga2->ninds * 2);
   /* extend population to fit offsprings */
   assert(offset != NULL);
@@ -130,14 +141,16 @@ void create_offspring(NSGA2ctx *nsga2, Pool *p, Population offset) {
 
 /* swith half randomly selected features between two individuls */
 void crossover(NSGA2ctx *nsga2, Individual *ind1, Individual *ind2) {
-  int random, n = nsga2->nfeatures;
+  int random;
+  const int n = nsga2->nfeatures;
   FOR_EACH_RANDOM(random, n)
   swap(&ind1->features[random], &ind2->features[random]);
   END_FOR_EACH_RANDOM
 }
 
-void mutate(NSGA2ctx *nsga2, Individual *offspring) {
-  int random, n = nsga2->nfeatures;
+void mutate(NSGA2ctx *nsga2, const Individual *offspring) {
+  int random;
+  const int n = nsga2->nfeatures;
   FOR_EACH_RANDOM(random, n)
   offspring->features[random] = offspring->features[random] -
                                 nsga2->mutstren / 2 +
@@ -153,24 +166,12 @@ void mutate(NSGA2ctx *nsga2, Individual *offspring) {
 /* do tournament and set best to the winner.
  * best can be NULL. */
 void tournament(NSGA2ctx *nsga2, Population *p, Individual *best) {
-  int random, n = nsga2->ntour_particips;
+  int random;
+  const int n = nsga2->ntour_particips;
   FOR_EACH_RANDOM(random, n)
   Individual *participant = p[random];
   if (best == NULL || crowding_operator(participant, best) == 1) {
     best = participant;
   }
   END_FOR_EACH_RANDOM
-}
-
-static void pickrand(int *buffer, size_t n, int *random) {
-  do
-    *random = rand() % n;
-  while (buffer[*random] != -1);
-  buffer[*random] = 1;
-}
-
-static void swap(double *a, double *b) {
-  double temp = *a;
-  *a = *b;
-  *b = temp;
 }
