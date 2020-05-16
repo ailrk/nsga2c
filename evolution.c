@@ -3,7 +3,8 @@
 #include "fastnondominsort.h"
 #include <stdlib.h>
 
-static void init(NSGAIIVals *nsga2, Pool *pool, Problem *problem) {
+/* setup env, allocate pool, and initialize population */
+static void initpool(NSGAIIVals *nsga2, Pool *pool, Problem *problem) {
   nsga2->problem = problem;
   allocpool(nsga2, pool);
   init_population(nsga2, pool);
@@ -13,33 +14,44 @@ static void init(NSGAIIVals *nsga2, Pool *pool, Problem *problem) {
   }
 }
 
-/* return front number */
-static int mk_newpop(NSGAIIVals *nsga2, Pool *pool, Population newpop) {
+/* generate new population based on pool->population.
+ * return last rank the loop hit after finishing. */
+static int make_newpopulation(NSGAIIVals *nsga2, Pool *pool, Population newpop) {
   assert(newpop == NULL);
+  Population beg, end;
   int rank = 0;
   size_t newpop_top = 0, frontsz = get_frontszp(rank, pool);
 
   /* alloc individule size to new population  */
-  newpop = (Population)malloc(sizeof(Individual) * nsga2->ninds);
+  newpop = (Population)malloc(sizeof(Individual) * nsga2->ninds * 2);
 
   while (newpop_top + frontsz < nsga2->ninds) {
     calculate_crowd_distance(nsga2, pool, rank);
-    /* cpy front into newpop */
-    newpop[newpop_top] =
+    /* cpy individules in front into newpop */
+    get_rank_tuple(rank, pool, beg, end);
+    for (Population b = beg, p = newpop; b < end; b++, p++, newpop_top++) {
+      *p = *b;
+    }
     rank++;
   }
-
+  return rank;
 }
 
 Population evolve(NSGAIIVals *nsga2, Problem *problem) {
   Pool *pool = NULL;
-  Population returned_pop, offspring, new_pop;
-  long frontnum;
+  Population returned_front, offset, new_pop = NULL;
+  long nfronts;
+  initpool(nsga2, pool, problem);
 
-  init(nsga2, pool, problem);
-  create_offspring(nsga2, pool);
+  offset = expandpopulation(nsga2, pool, nsga2->ninds);
+  create_offspring(nsga2, pool, offset);
   for (int i = 0; i < nsga2->ngen; i++) {
     fast_nondominated_sort(nsga2, pool);
-    frontnum = mk_newpop(nsga2, pool, new_pop, )
+    nfronts = make_newpopulation(nsga2, pool, new_pop);
+    // sort with crowding distance
+    qsort(pool->fronts[nfronts],  crowding_operator)
+    // extend
   }
+
+  return returned_front;
 }

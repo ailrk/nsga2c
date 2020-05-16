@@ -18,7 +18,7 @@ int allocpopulation(NSGAIIVals *nsga2, Pool *p) {
   p->population = (Population)malloc(sizeof(Individual) * nsga2->ninds);
   if (p->population == NULL) {
     perror("error when allocating population");
-    exit(-1);
+    return -1;
   }
   p->nrealpop = nsga2->ninds;
   return 0;
@@ -30,7 +30,7 @@ void freepopulation(Pool *p) {
 }
 
 /* return the begining of the newly allocated memory */
-Population reallocpopulation(NSGAIIVals *nsga2, Pool *p, size_t delta) {
+Population expandpopulation(NSGAIIVals *nsga2, Pool *p, size_t delta) {
   if (delta <= 0) {
     return NULL;
   }
@@ -49,7 +49,7 @@ int allocfronts(Pool * p, size_t rank) {
   p->fronts = (Population*)malloc(sizeof(Population) * rank);
   if (p->fronts == NULL) {
     perror("failed to allocate fronts");
-    exit(-1);
+    return -1;
   }
   p->nrank = rank;
   return 0;
@@ -94,10 +94,9 @@ void init_population(NSGAIIVals *nsga2, Pool *p) {
 
 /* create children from current population
  * space should be already allocated. */
-void create_offspring(NSGAIIVals *nsga2, Pool *p) {
+void create_offspring(NSGAIIVals *nsga2, Pool *p, Population offset) {
   assert(p->nrealpop <= nsga2->ninds * 2);
   /* extend population to fit offsprings */
-  Population offset = reallocpopulation(nsga2, p, nsga2->ninds);
   assert(offset != NULL);
   /* make sure has 2 empty space */
   for (int i = 0; i < nsga2->ninds; i += 2) {
@@ -157,7 +156,7 @@ void tournament(NSGAIIVals *nsga2, Population *p, Individual *best) {
   int random, n = nsga2->ntour_particips;
   FOR_EACH_RANDOM(random, n)
   Individual *participant = p[random];
-  if (best == NULL || crowding_operator(nsga2, participant, best) == true) {
+  if (best == NULL || crowding_operator(participant, best) == true) {
     best = participant;
   }
   END_FOR_EACH_RANDOM
