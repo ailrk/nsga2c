@@ -26,7 +26,7 @@ static bool update_rank(Pool *p, int rank, Population top) {
 }
 
 /* tag the domination information for an individule. rank 0 will be sorted. */
-static void tag_dominations(NSGAIIVals *nsga2, Pool *p) {
+static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
   int n = p->nrealpop;
   Individual *ind, *other;
   // TODO
@@ -57,7 +57,7 @@ static void tag_dominations(NSGAIIVals *nsga2, Pool *p) {
 
 /* keep decrement ndomin of individul until it hit 0, assign a rank for it
  * base on the number of iteration */
-static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
+static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
   size_t last_ranksz;
   Population front_end, front_beg;
   Individual *ind, *other;
@@ -65,7 +65,7 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
 
   /* at this point rank 0 should already be sorted out. */
   assert(p->nrank == 1);
-  get_rank_tuple(0, p, front_end, front_beg);
+  get_front_tuple(0, p, front_end, front_beg);
   last_ranksz = get_frontsz(front_beg, front_end);
 
   while (last_ranksz > 0) {
@@ -87,14 +87,14 @@ static void assign_rank(NSGAIIVals *nsga2, Pool *p) {
     }
     p->nrank++;
     update_rank(p, p->nrank, front_end);
-    get_rank_tuple(p->nrank, p, front_end, front_beg);
+    get_front_tuple(p->nrank, p, front_end, front_beg);
     last_ranksz = get_frontsz(front_end, front_beg);
   }
 }
 
 /* population should be 2x the size of original ninds in NSGAIIVals
  * Because of the newly appeneded offspring */
-bool fast_nondominated_sort(NSGAIIVals *nsga2, Pool *p) {
+bool fast_nondominated_sort(NSGA2ctx *nsga2, Pool *p) {
   /* new children should be appened at this point */
   if (p->nrealpop <= nsga2->ninds) {
     errno = ERANGE;

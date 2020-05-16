@@ -6,22 +6,24 @@
 /* index of objective in an Individual */
 
 static int cmp_objective(const void *a, const void *b, void *idx) {
-  Individual *self = (Individual *) a;
-  Individual *other = (Individual *) b;
-  int m = *(int*)idx;
-
-  if (self->objs[m] > other->objs[m]) return 1;
-  else if (self->objs[m] < other->objs[m]) return -1;
-  else return 0;
+  Individual *self = (Individual *)a;
+  Individual *other = (Individual *)b;
+  int m = *(int *)idx;
+  if (self->objs[m] > other->objs[m])
+    return 1;
+  else if (self->objs[m] < other->objs[m])
+    return -1;
+  else
+    return 0;
 }
 
 /* calculate crowding distance for one front */
-void calculate_crowd_distance(NSGAIIVals *nsga2, Pool *p, int rank) {
+void calculate_crowd_distance(NSGA2ctx *nsga2, Pool *p, int rank) {
   assert(p->fronts != NULL && p->fronts_sz > 0);
   Population front_beg, front_end;
   size_t frontsz;
   if (p->nrank > 0) {
-    get_rank_tuple(rank, p, front_end, front_beg);
+    get_front_tuple(rank, p, front_end, front_beg);
     get_frontsz(front_end, front_beg);
     for (Population ptr = front_beg; ptr <= front_end; ptr++) {
       ptr->crowd_dist = 0;
@@ -40,7 +42,9 @@ void calculate_crowd_distance(NSGAIIVals *nsga2, Pool *p, int rank) {
   }
 }
 
-bool crowding_operator(Individual *self, Individual *other) {
-  return self->rank < other->rank ||
-         (self->rank == other->rank && self->crowd_dist > other->crowd_dist);
+int crowding_operator(Individual *self, Individual *other) {
+  return (self->rank < other->rank ||
+          (self->rank == other->rank && self->crowd_dist > other->crowd_dist))
+             ? 1
+             : -1;
 }

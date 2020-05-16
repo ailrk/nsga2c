@@ -14,7 +14,7 @@ static void swap(double *a, double *b);
 
 /* mem */
 
-int allocpopulation(NSGAIIVals *nsga2, Pool *p) {
+int allocpopulation(NSGA2ctx *nsga2, Pool *p) {
   p->population = (Population)malloc(sizeof(Individual) * nsga2->ninds);
   if (p->population == NULL) {
     perror("error when allocating population");
@@ -30,7 +30,7 @@ void freepopulation(Pool *p) {
 }
 
 /* return the begining of the newly allocated memory */
-Population expandpopulation(NSGAIIVals *nsga2, Pool *p, size_t delta) {
+Population expandpopulation(NSGA2ctx *nsga2, Pool *p, size_t delta) {
   if (delta <= 0) {
     return NULL;
   }
@@ -60,7 +60,7 @@ void freefronts(Pool * pool) {
   pool->nrank = 0;
 }
 
-int allocpool(NSGAIIVals *nsga2, Pool *pool) {
+int allocpool(NSGA2ctx *nsga2, Pool *pool) {
   if (pool->population != NULL) {
     return 1;
   }
@@ -75,7 +75,7 @@ void freepool(Pool *pool) {
 
 /* create initial population with random features and objectives calculated.
  * return 0 on error */
-void init_population(NSGAIIVals *nsga2, Pool *p) {
+void init_population(NSGA2ctx *nsga2, Pool *p) {
   assert(p->population != NULL);
   double upper, lower, feature;
   for (int i = 0; i < nsga2->ninds; i++) {
@@ -94,7 +94,7 @@ void init_population(NSGAIIVals *nsga2, Pool *p) {
 
 /* create children from current population
  * space should be already allocated. */
-void create_offspring(NSGAIIVals *nsga2, Pool *p, Population offset) {
+void create_offspring(NSGA2ctx *nsga2, Pool *p, Population offset) {
   assert(p->nrealpop <= nsga2->ninds * 2);
   /* extend population to fit offsprings */
   assert(offset != NULL);
@@ -129,14 +129,14 @@ void create_offspring(NSGAIIVals *nsga2, Pool *p, Population offset) {
 #define END_FOR_EACH_RANDOM }
 
 /* swith half randomly selected features between two individuls */
-void crossover(NSGAIIVals *nsga2, Individual *ind1, Individual *ind2) {
+void crossover(NSGA2ctx *nsga2, Individual *ind1, Individual *ind2) {
   int random, n = nsga2->nfeatures;
   FOR_EACH_RANDOM(random, n)
   swap(&ind1->features[random], &ind2->features[random]);
   END_FOR_EACH_RANDOM
 }
 
-void mutate(NSGAIIVals *nsga2, Individual *offspring) {
+void mutate(NSGA2ctx *nsga2, Individual *offspring) {
   int random, n = nsga2->nfeatures;
   FOR_EACH_RANDOM(random, n)
   offspring->features[random] = offspring->features[random] -
@@ -152,11 +152,11 @@ void mutate(NSGAIIVals *nsga2, Individual *offspring) {
 
 /* do tournament and set best to the winner.
  * best can be NULL. */
-void tournament(NSGAIIVals *nsga2, Population *p, Individual *best) {
+void tournament(NSGA2ctx *nsga2, Population *p, Individual *best) {
   int random, n = nsga2->ntour_particips;
   FOR_EACH_RANDOM(random, n)
   Individual *participant = p[random];
-  if (best == NULL || crowding_operator(participant, best) == true) {
+  if (best == NULL || crowding_operator(participant, best) == 1) {
     best = participant;
   }
   END_FOR_EACH_RANDOM
