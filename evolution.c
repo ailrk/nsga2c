@@ -1,8 +1,8 @@
 #include "evolution.h"
 #include "crowddist.h"
 #include "defs.h"
-#include "utils.h"
 #include "fastnondominsort.h"
+#include "utils.h"
 #include <stdlib.h>
 
 /* setup env, allocate pool, and initialize population */
@@ -18,10 +18,10 @@ static void initpool(NSGA2ctx *nsga2, Pool *pool, Problem *problem) {
 }
 
 /* generate new population based on pool->population.
- * It will allocate n->ninds * 2 elements i memory. and fill
- * n->ninds elements here. The rest of space are reserved for offspring
- * for next generation.
- * return last rank the loop hit after finishing. */
+ * It will allocate n->ninds * 2 elements in memory. and fill first
+ * n->ninds elements. The rest of space are reserved for offspring
+ * in next generation.
+ * it will return the last rank the loop hit after finishing. */
 static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
                               Population newpop_top) {
   assert(newpop == NULL);
@@ -50,9 +50,8 @@ static void init_offspring(NSGA2ctx *nsga2, Pool *pool) {
   create_offspring(nsga2, pool, offset);
 }
 
-/* this comparator will be used to ele in compare array of Individual*, so
- * parameter will be of type (Individual **). To be used by crowding_operator
- * they need to be derefereced. */
+/* it will be used to compare elements of type Individual*, so it's
+ * parameter need to be (Individual **). */
 static int cmp_crod_dist(const void *a, const void *b) {
   return crowding_operator(*(Individual **)a, *(Individual **)b);
 }

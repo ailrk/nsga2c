@@ -36,8 +36,8 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
   for (size_t i = 0; i < n; i++) {
     ind = &p->population[i];
     ind->ndomin = 0;
-    /* use linked list because ind->dominates will always be traversaled
-     * and the contain needs to be update dyamically frequently */
+    /* use linked list because the contain needs to be update dyamically frequently
+     * ind->dominates will only be traversaled, linked list is OK. */
     ind->dominates = linew_head();
     for (int j = 0; j < p->nrealpop; j++) {
       other = &p->population[j];
@@ -48,7 +48,7 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
       }
     }
     if (ind->ndomin == 0) {
-      /* swap ind with rank 0 to the front. */
+      /* swap to the front. */
       swapind(sp++, ind);
       ind->rank = 0;
     }
@@ -57,7 +57,7 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
   update_rank(p, 1, sp);
 }
 
-/* keep decrement ndomin of individul until it hit 0, assign a rank for it
+/* keep decrementing ndomin of individul until it hit 0, assign a rank for it
  * base on the number of iteration */
 static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
   size_t last_ranksz;
@@ -65,7 +65,7 @@ static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
   Individual *ind = NULL, *other = NULL;
   const IndList *dominates;
 
-  /* at this point rank 0 should already be sorted out. */
+  /* at this point rank 0 should already be sorted. */
   assert(p->nrank == 1);
   get_front_tuple(0, p, front_end, front_beg);
   last_ranksz = get_frontsz(front_beg, front_end);
@@ -104,9 +104,9 @@ bool fast_nondominated_sort(NSGA2ctx *nsga2, Pool *p) {
     return false;
   }
   p->fronts_sz = 100;
-  /* p->fronts stores ptr to different part of population.
-   * all population can be fit into population.
-   * worst case is a single rank with all individules,
+  /* p->fronts stores ptr to different part of population. (like partioning)
+   * all individules can be fit into population.
+   * NOTE: worst case is a single rank with all individules,
    * in wich case p->fronts[0] (rank 0) has the same size as frontbuf. */
   p->fronts = (Population *)malloc(sizeof(Population) * p->fronts_sz);
   tag_dominations(nsga2, p);
