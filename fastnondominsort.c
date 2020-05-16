@@ -1,5 +1,7 @@
 #include "fastnondominsort.h"
 #include "utils.h"
+#include "defs.h"
+#include <stdbool.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>

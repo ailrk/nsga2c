@@ -1,5 +1,6 @@
 #include "crowddist.h"
 #include "utils.h"
+#include "defs.h"
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -18,7 +19,7 @@ static int cmp_objective(const void *a, const void *b, void *idx) {
 }
 
 /* calculate crowding distance for one front */
-void calculate_crowd_distance(NSGA2ctx *nsga2, Pool *p, int rank) {
+void calculate_crowd_distance(NSGA2ctx *nsga2, Pool *p, const int rank) {
   assert(p->fronts != NULL && p->fronts_sz > 0);
   Population front_beg = NULL, front_end = NULL;
   size_t frontsz;

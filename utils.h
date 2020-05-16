@@ -32,14 +32,14 @@ static inline void get_front_tuple(const size_t rank, const Pool *p,
   bottom = p->fronts[rank];
 }
 
-static inline size_t get_frontsz(const Population start, const Population end) {
-  return end - start;
+static inline size_t get_frontsz(const Population beg, const Population end) {
+  return end - beg;
 }
 
 static inline size_t get_frontszp(const size_t rank, const Pool *p) {
-  Population start = NULL, end = NULL;
-  get_front_tuple(rank, p, start, end);
-  return get_frontsz(start, end);
+  Population beg = NULL, end = NULL;
+  get_front_tuple(rank, p, beg, end);
+  return get_frontsz(beg, end);
 }
 
 #endif /* ifndef _UTILS */

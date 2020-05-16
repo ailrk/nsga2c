@@ -1,5 +1,7 @@
 #include "evolution.h"
 #include "crowddist.h"
+#include "defs.h"
+#include "utils.h"
 #include "fastnondominsort.h"
 #include <stdlib.h>
 
@@ -23,9 +25,9 @@ static void initpool(NSGA2ctx *nsga2, Pool *pool, Problem *problem) {
 static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
                               Population newpop_top) {
   assert(newpop == NULL);
-  Population fbeg, fend; /* front */
-  int rank = 0;
+  Population beg, end; /* front */
   const int ninds = nsga2->ninds;
+  int rank = 0;
   size_t top = 0, frontsz = get_frontszp(rank, pool);
 
   /* alloc individule size to new population  */
@@ -34,9 +36,9 @@ static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
   while (top + frontsz < ninds) { /* fill half */
     calculate_crowd_distance(nsga2, pool, rank);
     /* cpy individules in front into newpop */
-    get_front_tuple(rank, pool, fbeg, fend);
-    for (Population p = newpop; fbeg < fend; fbeg++, p++, top++) {
-      *p = *fbeg;
+    get_front_tuple(rank, pool, beg, end);
+    for (Population p = newpop; beg < end; beg++, p++, top++) {
+      *p = *beg;
     }
     rank++;
   }

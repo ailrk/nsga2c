@@ -34,7 +34,7 @@ static inline void lipush(IndList *list, Individual *ind) {
 }
 
 typedef Individual *Population;
-typedef double (*ObjectiveFunc)(double *features);
+typedef double (*ObjectiveFunc)(const double *const features);
 
 typedef struct Tuple {
   double upper;
@@ -70,7 +70,8 @@ typedef struct Pool {
 /* helpers */
 
 /* calculate objectives some features. Put result in double *objs */
-static inline void calobjs(NSGA2ctx *nsga2, double *features, double *objs) {
+static inline void calobjs(NSGA2ctx *nsga2, const double *const features,
+                           double *const objs) {
   for (size_t i = 0; i < nsga2->nobjs; i++) {
     objs[i] = nsga2->problem->objective_funcs[i](features);
   }
