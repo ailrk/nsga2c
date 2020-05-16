@@ -37,7 +37,7 @@ static inline size_t get_frontsz(Population start, Population end) {
 }
 
 static inline size_t get_frontszp(size_t rank, Pool *p) {
-  Population start, end;
+  Population start = NULL, end = NULL;
   get_front_tuple(rank, p, start, end);
   return get_frontsz(start, end);
 }

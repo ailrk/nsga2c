@@ -1,5 +1,6 @@
 #ifndef _DEFS
 #define _DEFS
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -22,7 +23,8 @@ typedef struct IndList {
 
 static inline IndList *linew_head() {
   IndList *list = (IndList *)malloc(sizeof(IndList));
-  *list = {.ind = NULL, .next = NULL};
+  list->ind = NULL;
+  list->next = NULL;
   return list;
 }
 
@@ -84,12 +86,12 @@ static inline bool dominates(NSGA2ctx *nsga2, Individual *a, Individual *b) {
 }
 
 static inline void mkind(Individual *ind) {
-  *ind = {.rank = 0,
-          .crowd_dist = 0.0,
-          .features = NULL,
-          .objs = NULL,
-          .dominates = NULL,
-          .ndomin = 0L};
+  ind->rank = 0;
+  ind->crowd_dist = 0.0;
+  ind->features = NULL;
+  ind->objs = NULL;
+  ind->dominates = NULL;
+  ind->ndomin = 0L;
 }
 
 #endif /* ifndef _DEFS */

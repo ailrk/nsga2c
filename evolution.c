@@ -25,7 +25,7 @@ static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
   assert(newpop == NULL);
   Population fbeg, fend; /* front */
   int rank = 0;
-  const int  ninds = nsga2->ninds;
+  const int ninds = nsga2->ninds;
   size_t top = 0, frontsz = get_frontszp(rank, pool);
 
   /* alloc individule size to new population  */
@@ -44,10 +44,6 @@ static int make_newpopulation(NSGA2ctx *nsga2, Pool *pool, Population newpop,
   return rank;
 }
 
-static Population newpop_end(NSGA2ctx *nsga2, Population newpop) {
-  return newpop + nsga2->ninds * 2;
-}
-
 static void init_offspring(NSGA2ctx *nsga2, Pool *pool) {
   Population offset = expandpopulation(nsga2, pool, nsga2->ninds);
   create_offspring(nsga2, pool, offset);
@@ -60,9 +56,19 @@ static int cmp_crod_dist(const void *a, const void *b) {
   return crowding_operator(*(Individual **)a, *(Individual **)b);
 }
 
-Population evolve(NSGA2ctx *nsga2, Problem *problem) {
+/* return size of front 0 */
+static size_t cpy_final_front(NSGA2ctx *nsga2, Pool *pool, Population p,
+                              size_t front_sz) {
+  p = (Population)malloc(sizeof(Individual) * front_sz);
+  /* cpy front 0 to returned_front */
+  for (Population ptr = pool->fronts[0]; ptr < *pool->fronts + front_sz;
+       ptr++) {
+  }
+}
+
+Population evolve(NSGA2ctx *nsga2, Problem *problem, size_t *front_sz) {
   Pool *pool = NULL;
-  Population returned_front;
+  Population returned_front = NULL;
   /* newpop_top: a ptr point to new_population + size of new_population */
   Population new_population = NULL, newpop_top;
   long lastfront;
@@ -80,11 +86,15 @@ Population evolve(NSGA2ctx *nsga2, Problem *problem) {
     for (size_t i = 0; i < nsga2->ninds - (newpop_top - new_population); i++) {
       newpop_top[i] = pool->fronts[lastfront][i];
     }
-    freepool(pool);
+    freepopulation(pool);
     pool->population = new_population;
 
     create_offspring(nsga2, pool, newpop_top);
   }
+
+  *front_sz = get_frontszp(0, pool);
+  cpy_final_front(nsga2, pool, returned_front, *front_sz);
+  freepool(pool);
 
   return returned_front;
 }
