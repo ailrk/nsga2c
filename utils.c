@@ -107,13 +107,16 @@ void init_population(NSGA2ctx *nsga2, Pool *p) {
  * space should be already allocated. */
 void create_offspring(NSGA2ctx *nsga2, Pool *p, const Population offset) {
   assert(p->nrealpop <= nsga2->ninds * 2);
+
   /* extend population to fit offsprings */
   assert(offset != NULL);
+
   /* make sure has 2 empty space */
   for (int i = 0; i < nsga2->ninds; i += 2) {
     Individual *parent1 = NULL, *parent2, *child1, *child2;
     tournament(nsga2, &p->population, parent1);
     parent2 = parent1;
+
     /* make sure parent1 and parent2 are different individuals */
     while (parent2 == parent1) {
       tournament(nsga2, &p->population, parent2);

@@ -36,6 +36,7 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
   for (size_t i = 0; i < n; i++) {
     ind = &p->population[i];
     ind->ndomin = 0;
+
     /* use linked list because the contain needs to be update dyamically frequently
      * ind->dominates will only be traversaled, linked list is OK. */
     ind->dominates = linew_head();
@@ -48,11 +49,13 @@ static void tag_dominations(NSGA2ctx *nsga2, Pool *p) {
       }
     }
     if (ind->ndomin == 0) {
+
       /* swap to the front. */
       swapind(sp++, ind);
       ind->rank = 0;
     }
   }
+
   /* end of the rank 0 in rank buf */
   update_rank(p, 1, sp);
 }
@@ -75,11 +78,13 @@ static void assign_rank(NSGA2ctx *nsga2, Pool *p) {
       ind = &front_beg[i];
       dominates = ind->dominates;
       other = dominates->ind;
+
       /* traversal the linked list */
       while (other != NULL) {
         other->ndomin -= 1;
         if (other->ndomin == 0) {
           other->rank += 1;
+
           /* move other to the front */
           swapind(front_end++, other);
         }
@@ -104,6 +109,7 @@ bool fast_nondominated_sort(NSGA2ctx *nsga2, Pool *p) {
     return false;
   }
   p->fronts_sz = 100;
+
   /* p->fronts stores ptr to different part of population. (like partioning)
    * all individules can be fit into population.
    * NOTE: worst case is a single rank with all individules,
